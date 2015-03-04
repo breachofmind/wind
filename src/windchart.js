@@ -5,9 +5,25 @@
  * @author Mike Adamczyk <mike@bom.us>
  * @package skyward
  */
+Date.prototype.getMonthName = function () {
+    var months = ["January","February","March","April","May","June","July","August","October","November","December"];
+    return months[this.getMonth()];
+}
+$(document).ready (function () {
+    $('.months a').on ('click', function(event) {
+        event.preventDefault();
+        var m = $(this).data('month');
+        $('.months a').removeClass('active');
+        $(this).addClass('active');
+        console.log(m);
+        getData(m);
+    })
+})
 
 
 getData(1);
+
+
 
 // Get the JSON data via AJAX.
 function getData (month) {
@@ -24,8 +40,7 @@ function getData (month) {
 
 function init (json) {
     var body = $('body');
-    $('#chart').html('');
-    $('.months a.active').removeClass('active');
+    
     body.removeClass('loading');
     var chart = new ASOS_Chart (json);
 }
@@ -39,6 +54,8 @@ function ASOS_Chart (json) {
     // Globals.
     var self = this;
     var container = d3.select ('#chart');
+    container.select('svg').remove();
+    var svg = container.append('svg');
     
     // Data arrays.
     this.julians = {};
@@ -57,19 +74,9 @@ function ASOS_Chart (json) {
         }
         this.julians[datestr].add (object);
     }
-    
+    var date = this.ids[1].date;
     var scale = 9;
     var spacing = 40;
-    
-    var Event = {
-        MOUSEOVER: function (d) {
-            var sel = d3.select(this).attr ('stroke-width',10);
-            sel.on ('mouseout', Event.MOUSEOUT);
-        },
-        MOUSEOUT: function (d) {
-            d3.select(this).attr ('stroke-width',2);
-        }
-    }
     
     /**
      * The position of each point is projected from the previous point based on the windspeed and direction.
@@ -80,49 +87,77 @@ function ASOS_Chart (json) {
         .y(function(d){ return d.y; })
         .interpolate('basis');
     
-    var days=0;
-    for (var day in this.julians) {
-        
-        var data = this.julians[day];
-        var xOrigin = days*spacing+100;
-        data.resetOrigin(xOrigin, 500);
-        var dindex = data.getIndex();
-        var color = '#'+Math.floor(Math.random()*16777215).toString(16);
-        var group = container.append ('g');
-        group.append ("circle")
-                .attr("r",6)
-                .attr("cx", xOrigin)
-                .attr("cy", 500)
-                .attr("fill",color);
-        
-        group.append("text")
-                .attr('x', xOrigin)
-                .attr('y', 485)
-                .attr("dy", ".35em")
-                .attr("text-anchor","middle")
-                .text(dindex[0].day);
-        
-        // reset the origin.
-        var path = group.append ("path")
-                .attr("d", this.line(dindex))
-                .attr("stroke",color)
-                .attr('stroke-width',2)
-                .attr("fill","none")
-                .on ('mouseover', Event.MOUSEOVER);
-        var len = path.node().getTotalLength();
-//        var pathFunc = function() {
-//            var data = this.julians[day];
-//            var d = data.getIndex();
-//            group.append ("circle").attr('cx', d[d.length-1].x).attr('cy', d[d.length-1].y)
-//            .attr('r',6).attr('fill',color);
-//        }
-        path.attr("stroke-dasharray", len+" "+len).attr("stroke-dashoffset", len)
-                .transition().duration(10*len).ease("quad-out").attr("stroke-dashoffset",0)
-                //.each("end", pathFunc);
+    /**
+     * Main drawing method.
+     * @returns {undefined}
+     */
+    this.draw = function () {
+        var days=0;
+        var groups={};
+        svg.append ('text').text(date.getMonthName()).attr('x',80).attr('y',465).attr('dy','0.5em').attr('font-weight','700');
+        for (var day in this.julians) {
+            groups[day] = {};
+            var data = this.julians[day];
+            var xOrigin = days*spacing+100;
+            data.resetOrigin(xOrigin, 500);
+            var dindex = data.getIndex();
+            
+            //var color = '#'+Math.floor(Math.random()*16777215).toString(16);
+            var color = rainbow (30, days);
+            
+            var group = svg.append ('g');
+            
+            group.append ("circle")
+                    .attr("r",6)
+                    .attr("cx", xOrigin)
+                    .attr("cy", 500)
+                    .attr("fill",color);
 
-        days++;
-    };
+            group.append("text")
+                    .attr('x', xOrigin)
+                    .attr('y', 485)
+                    .attr("dy", ".35em")
+                    .attr("text-anchor","middle")
+                    .text(dindex[0].day);
 
+
+            // reset the origin.
+            var path = group.append ("path")
+                    .attr('id', day)
+                    .attr("d", this.line(dindex))
+                    .attr("stroke",color)
+                    .attr('stroke-width',2)
+                    .attr("fill","none")
+            var len = path.node().getTotalLength();
+
+            groups[day].group = group;
+            groups[day].path = path;
+            groups[day].data = dindex;
+            groups[day].color = color;
+            groups[day].length = len;
+            groups[day].date = dindex[0].date;
+
+            var drawCircleEnd = function() { 
+                var day = d3.select(this).attr('id');
+                var data = groups[day].data;
+                var last = data[data.length-2];
+                svg.append ('circle')
+                    .attr ('cx', last.x)
+                    .attr ('cy', last.y)
+                    .attr ('r',6)
+                    .attr ('fill', groups[day].color);
+            }
+            path.attr("stroke-dasharray", len+" "+len).attr("stroke-dashoffset", len)
+                    .transition().duration(10*len).ease("quad-out").attr("stroke-dashoffset",0)
+                    .each('end', drawCircleEnd);
+            
+
+            days++;
+        };
+        
+    }
+
+    this.draw();
     
     /**
      * ASOS Data object class.
@@ -134,6 +169,7 @@ function ASOS_Chart (json) {
         for (var x in json) { this[x] = json[x]; }
         this.x=100;
         this.y=500;
+        this.date = new Date (this.date);
         
         /**
          * Determine the coordinates of this point.
