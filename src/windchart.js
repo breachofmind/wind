@@ -109,20 +109,21 @@ function ASOS_Chart (json) {
             var dindex = data.getIndex();
             
             //var color = '#'+Math.floor(Math.random()*16777215).toString(16);
-            var color = rainbow (30, days);
+            var color = rainbow (31, days);
             
             var group = svg.append ('g');
             
             group.append ("circle")
-                    .attr("r",6)
+                    .attr("r",12)
                     .attr("cx", xOrigin)
                     .attr("cy", yOrigin)
                     .attr("fill",color);
 
             group.append("text")
                     .attr('x', xOrigin)
-                    .attr('y', yOrigin-15)
-                    .attr("dy", ".35em")
+                    .attr('y', yOrigin+3)
+                    .attr("font-size", 10)
+                    .attr("fill","white")
                     .attr("text-anchor","middle")
                     .text(dindex[0].day);
 
