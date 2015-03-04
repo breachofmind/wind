@@ -6,17 +6,18 @@
  * @package skyward
  */
 Date.prototype.getMonthName = function () {
-    var months = ["January","February","March","April","May","June","July","August","October","November","December"];
+    var months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
     return months[this.getMonth()];
 }
 $(document).ready (function () {
+    
     $('.months a').on ('click', function(event) {
         event.preventDefault();
         var m = $(this).data('month');
         $('.months a').removeClass('active');
         $(this).addClass('active');
-        console.log(m);
-        getData(m);
+        var callsign = $('#callsign').val();
+        getData(m, callsign);
     })
 })
 
@@ -26,11 +27,12 @@ getData(1);
 
 
 // Get the JSON data via AJAX.
-function getData (month) {
+function getData (month,callsign) {
     var m = month<10 ? "0"+month.toString() : month.toString();
     $('body').addClass('loading');
     $.ajax ({
-        url:"http://breach.node:8080?m="+m,
+        url:"http://breach.node:8080",
+        data:{m:m, callsign:callsign},
         method:'GET', dataType:'JSON',
         success: init,
         error: function (xhr,error) { console.log (xhr,error); }
@@ -74,9 +76,12 @@ function ASOS_Chart (json) {
         }
         this.julians[datestr].add (object);
     }
+    
     var date = this.ids[1].date;
     var scale = 9;
     var spacing = 40;
+    var xOrigin = 100;
+    var yOrigin = 400;
     
     /**
      * The position of each point is projected from the previous point based on the windspeed and direction.
@@ -94,12 +99,13 @@ function ASOS_Chart (json) {
     this.draw = function () {
         var days=0;
         var groups={};
-        svg.append ('text').text(date.getMonthName()).attr('x',80).attr('y',465).attr('dy','0.5em').attr('font-weight','700');
+        svg.append ('text').text(date.getMonthName()).attr('x',xOrigin-15).attr('y',yOrigin-35).attr('dy','0.5em').attr('font-weight','700');
+        
         for (var day in this.julians) {
             groups[day] = {};
             var data = this.julians[day];
-            var xOrigin = days*spacing+100;
-            data.resetOrigin(xOrigin, 500);
+            xOrigin = days*spacing+100;
+            data.resetOrigin(xOrigin, yOrigin);
             var dindex = data.getIndex();
             
             //var color = '#'+Math.floor(Math.random()*16777215).toString(16);
@@ -110,12 +116,12 @@ function ASOS_Chart (json) {
             group.append ("circle")
                     .attr("r",6)
                     .attr("cx", xOrigin)
-                    .attr("cy", 500)
+                    .attr("cy", yOrigin)
                     .attr("fill",color);
 
             group.append("text")
                     .attr('x', xOrigin)
-                    .attr('y', 485)
+                    .attr('y', yOrigin-15)
                     .attr("dy", ".35em")
                     .attr("text-anchor","middle")
                     .text(dindex[0].day);
@@ -167,8 +173,8 @@ function ASOS_Chart (json) {
     function ASOS_Data (json) {
         // Setter.
         for (var x in json) { this[x] = json[x]; }
-        this.x=100;
-        this.y=500;
+        this.x=xOrigin;
+        this.y=yOrigin;
         this.date = new Date (this.date);
         
         /**
@@ -291,9 +297,9 @@ function slope (pt1,pt2) {
  * @returns {Point}
  */
 function projectPoint (sp, d, az) {
-    az-=90; // Correction for coordinate plane. 0 & 360 are true north (up)
+    az+=90; // Correction for coordinate plane. 0 & 360 are true north (up)
     var x1 = sp[0], y1 = sp[1];
-    var x2 = x1 + Math.cos(rad(az)) * d;
+    var x2 = x1 - Math.cos(rad(az)) * d;
     var y2 = y1 - Math.sin(rad(az)) * d;
     return [Math.round(x2*100)/100,Math.round(y2*100)/100];
 }

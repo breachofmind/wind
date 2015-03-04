@@ -8,6 +8,8 @@ new (function ASOS_App () {
     var http = require ('http');
     var url = require ('url');
     var mu = require ('mu2');
+    var sys = require ('sys');
+    var exec = require('child_process').exec;
     
     this.limit = false; // Make false to get all records.
     
@@ -30,10 +32,26 @@ new (function ASOS_App () {
         http.createServer (function(req, res) {
             app.req = req;
             app.res = res;
+            var dataUrl = 'ftp://ftp.ncdc.noaa.gov/pub/data/asos-fivemin/6401-2014/';
             var query = url.parse (req.url, true).query;
-            var file = path.join (__dirname+"/data/", '64010KORD2014'+query.m+'.dat');
-            fs.readFile(file, {encoding:'utf-8'}, app.read);
-            console.log (new Date()+' Request by '+req.connection.remoteAddress);
+            var callsign = query.callsign ? query.callsign : 'KORD';
+            var month = query.m ? query.m : "01";
+            var dataFile = '64010'+callsign+'2014'+month+'.dat';
+            var file = path.join (__dirname+"/data/", dataFile);
+            
+            if (!path.existsSync(file)) {
+                exec("wget -P data "+dataUrl+dataFile, function(err,stdout,stderr) {
+                    if (err) throw err;
+                    file = path.join (__dirname+"/data/", dataFile);
+                    fs.readFile(file, {encoding:'utf-8'}, app.read);
+                });
+            } else {
+                fs.readFile(file, {encoding:'utf-8'}, app.read);
+            }
+            
+            
+
+            console.log (new Date()+' Request by '+req.connection.remoteAddress+' - '+dataFile);
         })
         .listen(8080);
         console.log ('Listening on :8080.');

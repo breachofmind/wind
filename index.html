@@ -16,7 +16,9 @@
 
             <script src="/src/windchart.js"></script>
             
-            <h3>2014 ASOS Wind Data for KORD (Chicago O'Hare Airport)</h3>
+            <div id="compass" draggable="true"></div>
+            
+            <h3>2014 ASOS Wind Data</h3>
             
             <div class='months'>
                 <a href="#" data-month="1" class='active'>Jan</a>
@@ -32,6 +34,17 @@
                 <a href="#" data-month="11">Nov</a>
                 <a href="#" data-month="12">Dec</a>
             </div>
+            
+            <label>Weather Station
+                <select id="callsign" name="callsign">
+                    <option value="KORD">Chicago O'Hare Intl Airport</option>
+                    <option value="KPDX">Portland AFB|McLoughlin</option>
+                    <option value="KPHX">Phoenix Sky Harbor Intl Airport</option>
+                    <option value="KPNS">Pensacola Intl Airport</option>
+                    <option value="KBUF">Buffalo New York Intl Airport</option>
+                    <option value="KEYW">Key West Intl Airport</option>
+                </select>
+            </label>
         </div>
     </body>
 </html>
