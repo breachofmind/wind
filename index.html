@@ -1,0 +1,36 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>Chicago O'Hare 5-Minute Wind Data</title>
+        <link rel="stylesheet" href="/lib/normalize.css"/>
+        <link rel="stylesheet" href="/lib/stylesheet.css"/>
+        <script src="/lib/jquery-2.1.1.min.js"></script>
+        <script src="/lib/d3.min.js"></script>
+    </head>
+    
+    <body class="loading">
+        <div id="container">
+            <svg id="chart"></svg>
+
+
+            <script src="/src/windchart.js"></script>
+            
+            <h3>2014 ASOS Wind Data for KORD (Chicago O'Hare Airport)</h3>
+            
+            <div class='months'>
+                <a href="javascript:getData(1);" class='active'>Jan</a>
+                <a href="javascript:getData(2);">Feb</a>
+                <a href="javascript:getData(3);">Mar</a>
+                <a href="javascript:getData(4);">Apr</a>
+                <a href="javascript:getData(5);">May</a>
+                <a href="javascript:getData(6);">Jun</a>
+                <a href="javascript:getData(7);">Jul</a>
+                <a href="javascript:getData(8);">Aug</a>
+                <a href="javascript:getData(9);">Sep</a>
+                <a href="javascript:getData(10);">Oct</a>
+                <a href="javascript:getData(11);">Nov</a>
+                <a href="javascript:getData(12);">Dec</a>
+            </div>
+        </div>
+    </body>
+</html>
