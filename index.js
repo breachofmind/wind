@@ -1,6 +1,7 @@
 new (function ASOS_App () {
     
     var app = this;
+    var dataUrl = 'ftp://ftp.ncdc.noaa.gov/pub/data/asos-fivemin/6401-2014/';
     
     // Dependancies
     var fs = require ('fs');
@@ -29,34 +30,42 @@ new (function ASOS_App () {
      */
     this.runServer = function () {
         
-        http.createServer (function(req, res) {
-            app.req = req;
-            app.res = res;
-            var dataUrl = 'ftp://ftp.ncdc.noaa.gov/pub/data/asos-fivemin/6401-2014/';
-            var query = url.parse (req.url, true).query;
-            var callsign = query.callsign ? query.callsign : 'KORD';
-            var month = query.m ? query.m : "01";
-            var dataFile = '64010'+callsign+'2014'+month+'.dat';
-            var file = path.join (__dirname+"/data/", dataFile);
-            
-            if (!path.existsSync(file)) {
-                exec("wget -P data "+dataUrl+dataFile, function(err,stdout,stderr) {
-                    if (err) throw err;
-                    file = path.join (__dirname+"/data/", dataFile);
-                    fs.readFile(file, {encoding:'utf-8'}, app.read);
-                });
-            } else {
-                fs.readFile(file, {encoding:'utf-8'}, app.read);
-            }
-            
-            
-
-            console.log (new Date()+' Request by '+req.connection.remoteAddress+' - '+dataFile);
-        })
-        .listen(8080);
+        http.createServer (ServerResponse).listen(8080);
         console.log ('Listening on :8080.');
     };
     
+    /**
+     * Server response callback.
+     * @param {request} req
+     * @param {response} res
+     * @returns {undefined}
+     */
+    function ServerResponse (req,res) {
+        app.req = req;
+        app.res = res;
+        
+        var query = url.parse (req.url, true).query;
+        var callsign = query.callsign ? query.callsign : 'KORD'; // Default to Chicago O'Hare.
+        var month = query.m ? query.m : "01";
+        var dataFile = '64010'+callsign+'2014'+month+'.dat';
+        var file = path.join (__dirname+"/data/", dataFile);
+
+        if (!path.existsSync(file)) {
+            exec("wget -P data "+dataUrl+dataFile, function(err,stdout,stderr) {
+                if (err) throw err;
+                file = path.join (__dirname+"/data/", dataFile);
+                fs.readFile(file, {encoding:'utf-8'}, app.read);
+            });
+        } else {
+            fs.readFile(file, {encoding:'utf-8'}, app.read);
+        }
+
+
+
+        console.log (new Date()+' Request by '+req.connection.remoteAddress+' - '+dataFile);
+    }
+
+
     /**
      * Callback method for readFile.
      * @param {object} err

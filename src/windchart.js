@@ -1,6 +1,6 @@
 /**
  * D3 source for Wind chart.
- * Loaded after <svg> tag.
+ * Refer to init.js for instantiation.
  * 
  * @author Mike Adamczyk <mike@bom.us>
  * @package skyward
@@ -9,29 +9,13 @@ Date.prototype.getMonthName = function () {
     var months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
     return months[this.getMonth()];
 }
-$(document).ready (function () {
-    
-    $('.months a').on ('click', function(event) {
-        event.preventDefault();
-        var m = $(this).data('month');
-        $('.months a').removeClass('active');
-        $(this).addClass('active');
-        var callsign = $('#callsign').val();
-        getData(m, callsign);
-    })
-})
-
-
-getData(1);
-
-
 
 // Get the JSON data via AJAX.
 function getData (month,callsign) {
     var m = month<10 ? "0"+month.toString() : month.toString();
     $('body').addClass('loading');
     $.ajax ({
-        url:"http://breach.node:8080",
+        url:SOURCEURL, // Node.js server, see index.js
         data:{m:m, callsign:callsign},
         method:'GET', dataType:'JSON',
         success: init,
@@ -59,6 +43,12 @@ function ASOS_Chart (json) {
     container.select('svg').remove();
     var svg = container.append('svg');
     
+    // Settings
+    var scale = 9;
+    var spacing = 40;
+    var xOrigin = 100;
+    var yOrigin = 400;
+    
     // Data arrays.
     this.julians = {};
     this.ids = [];
@@ -78,10 +68,7 @@ function ASOS_Chart (json) {
     }
     
     var date = this.ids[1].date;
-    var scale = 9;
-    var spacing = 40;
-    var xOrigin = 100;
-    var yOrigin = 400;
+
     
     /**
      * The position of each point is projected from the previous point based on the windspeed and direction.
@@ -104,7 +91,7 @@ function ASOS_Chart (json) {
         for (var day in this.julians) {
             groups[day] = {};
             var data = this.julians[day];
-            xOrigin = days*spacing+100;
+            xOrigin = days*spacing+100; // Shift start of day to a new column
             data.resetOrigin(xOrigin, yOrigin);
             var dindex = data.getIndex();
             
@@ -117,7 +104,8 @@ function ASOS_Chart (json) {
                     .attr("r",12)
                     .attr("cx", xOrigin)
                     .attr("cy", yOrigin)
-                    .attr("fill",color);
+                    .attr("fill",color)
+                    .on('mouseover', Event.HILITE);
 
             group.append("text")
                     .attr('x', xOrigin)
@@ -143,7 +131,8 @@ function ASOS_Chart (json) {
             groups[day].color = color;
             groups[day].length = len;
             groups[day].date = dindex[0].date;
-
+            
+            // Adds a dot end to line when drawing is complete.
             var drawCircleEnd = function() { 
                 var day = d3.select(this).attr('id');
                 var data = groups[day].data;
@@ -154,6 +143,7 @@ function ASOS_Chart (json) {
                     .attr ('r',6)
                     .attr ('fill', groups[day].color);
             }
+            // Line drawing animation
             path.attr("stroke-dasharray", len+" "+len).attr("stroke-dashoffset", len)
                     .transition().duration(10*len).ease("quad-out").attr("stroke-dashoffset",0)
                     .each('end', drawCircleEnd);

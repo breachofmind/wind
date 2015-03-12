@@ -19,3 +19,11 @@ function rainbow (numOfSteps, step) {
     var c = "#" + ("00" + (~ ~(r * 255)).toString(16)).slice(-2) + ("00" + (~ ~(g * 255)).toString(16)).slice(-2) + ("00" + (~ ~(b * 255)).toString(16)).slice(-2);
     return (c);
 }
+
+
+var Event = {
+    HILITE: function (event) {
+        var el = d3.select(this.parentNode);
+        console.log(el);
+    }
+}
