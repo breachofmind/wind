@@ -244,14 +244,15 @@ function ASOS_Chart (json) {
                     .attr("r",12)
                     .attr("cx", resource.origin[0])
                     .attr("cy", resource.origin[1])
-                    .attr("fill",resource.color);
+                    .attr("stroke",resource.color).attr('stroke-width',3)
+                    .attr("fill", "none");
             
             // Day number.
             group.append("text")
                     .attr('x', resource.origin[0])
                     .attr('y', resource.origin[1]+3)
                     .attr("font-size", 10)
-                    .attr("fill","black")
+                    .attr("fill","white")
                     .attr("text-anchor","middle")
                     .text(resource.day+1);
             
