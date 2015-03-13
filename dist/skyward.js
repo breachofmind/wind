@@ -196,15 +196,17 @@ function ASOS_Chart (json) {
         
         this.clear ();
         var svg = container.append('svg');
+        var scale = d3.scale.linear().range([1,30]).domain([0,1000]);
         
         // Adds a dot end to line when drawing is complete.
         var drawCircleEnd = function () { 
             var julian = d3.select(this).attr('id');
             var last = objects[julian].data.getLast();
+            var len = objects[julian].length;
             svg.append ('circle')
                 .attr ('cx', last.x)
                 .attr ('cy', last.y)
-                .attr ('r',6)
+                .attr ('r',scale(len))
                 .attr ('fill', objects[julian].color);
         }
             
@@ -233,7 +235,7 @@ function ASOS_Chart (json) {
             // Line drawing animation
             path.attr("stroke-dasharray", len+" "+len)
                     .attr("stroke-dashoffset", len)
-                    .transition().duration(10*len).ease("quad-out")
+                    .transition().duration(10*len).ease("quad-in-out")
                     .attr("stroke-dashoffset",0)
                     .each('end', drawCircleEnd);
             
