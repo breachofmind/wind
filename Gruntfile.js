@@ -7,9 +7,6 @@ module.exports = function (grunt) {
             options: { separator:";" },
             dist: {
                 src: [
-                    'src/config.js',
-                    'lib/js/jquery-2.1.1.min.js',
-                    'lib/js/d3.min.js',
                     'src/util.js',
                     'src/windchart.js'
                 ],

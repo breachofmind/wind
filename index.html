@@ -4,7 +4,9 @@
         <title>ASOS 5-Minute Wind Data</title>
         <link rel="stylesheet" href="/lib/css/normalize.css"/>
         <link rel="stylesheet" href="/lib/css/stylesheet.css"/>
-        <script src="/dist/skyward.min.js"></script>
+        <script src="/lib/js/jquery-2.1.1.min.js"></script>
+        <script src="/lib/js/d3.min.js"></script>
+        <script src="/dist/skyward.js"></script>
     </head>
     
     <body class="loading">
@@ -14,35 +16,46 @@
 
             <script src="/src/init.js"></script>
             
-            <div id="compass" draggable="true"></div>
             
-            <h3>2014 ASOS Wind Vector Data</h3>
+            <nav id="ui">
+                <h3><a title="Data reference" href="http://www.ncdc.noaa.gov/data-access/land-based-station-data/land-based-datasets/automated-surface-observing-system-asos" target="_blank">
+                        2014 ASOS Wind Vector Data
+                    </a></h3>
+
+                <div class='months'>
+                    <a href="#" data-month="1" class='active'>Jan</a>
+                    <a href="#" data-month="2">Feb</a>
+                    <a href="#" data-month="3">Mar</a>
+                    <a href="#" data-month="4">Apr</a>
+                    <a href="#" data-month="5">May</a>
+                    <a href="#" data-month="6">Jun</a>
+                    <a href="#" data-month="7">Jul</a>
+                    <a href="#" data-month="8">Aug</a>
+                    <a href="#" data-month="9">Sep</a>
+                    <a href="#" data-month="10">Oct</a>
+                    <a href="#" data-month="11">Nov</a>
+                    <a href="#" data-month="12">Dec</a>
+                </div>
+                
+                <div>
+                    <div class="selector">
+                        <label class="station">Weather Station
+                            <select id="callsign" name="callsign">
+                                <option value="KORD">Chicago O'Hare Intl Airport</option>
+                                <option value="KPDX">Portland AFB|McLoughlin</option>
+                                <option value="KPHX">Phoenix Sky Harbor Intl Airport</option>
+                                <option value="KPNS">Pensacola Intl Airport</option>
+                                <option value="KBUF">Buffalo New York Intl Airport</option>
+                                <option value="KEYW">Key West Intl Airport</option>
+                            </select>
+
+                        </label>
+                    </div>
+                    <img id="loader" src="/lib/images/loader.gif"/>
+                </div>
+            </nav>
             
-            <div class='months'>
-                <a href="#" data-month="1" class='active'>Jan</a>
-                <a href="#" data-month="2">Feb</a>
-                <a href="#" data-month="3">Mar</a>
-                <a href="#" data-month="4">Apr</a>
-                <a href="#" data-month="5">May</a>
-                <a href="#" data-month="6">Jun</a>
-                <a href="#" data-month="7">Jul</a>
-                <a href="#" data-month="8">Aug</a>
-                <a href="#" data-month="9">Sep</a>
-                <a href="#" data-month="10">Oct</a>
-                <a href="#" data-month="11">Nov</a>
-                <a href="#" data-month="12">Dec</a>
-            </div>
             
-            <label>Weather Station
-                <select id="callsign" name="callsign">
-                    <option value="KORD">Chicago O'Hare Intl Airport</option>
-                    <option value="KPDX">Portland AFB|McLoughlin</option>
-                    <option value="KPHX">Phoenix Sky Harbor Intl Airport</option>
-                    <option value="KPNS">Pensacola Intl Airport</option>
-                    <option value="KBUF">Buffalo New York Intl Airport</option>
-                    <option value="KEYW">Key West Intl Airport</option>
-                </select>
-            </label>
         </div>
     </body>
 </html>
